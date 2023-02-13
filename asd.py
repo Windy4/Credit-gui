@@ -63,7 +63,7 @@ class MainWindow(QMainWindow):
 
     def submit_clicked(self):
         name = self.account_name_input.text()
-        balance = str(self.retrieve_balance(name))
+        balance = self.retrieve_balance(name)
         if balance:
             self.withdraw_button.setVisible(True)
             self.deposit_button.setVisible(True)
