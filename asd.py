@@ -1,6 +1,8 @@
 import sys
 from PySide6.QtWidgets import QApplication, QMainWindow, QLabel, QLineEdit, QPushButton, QVBoxLayout, QWidget
 
+#Main Class, Widgets and fucntions
+
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
@@ -10,6 +12,8 @@ class MainWindow(QMainWindow):
 
         self.create_widgets()
         self.show()
+
+    #Makes the Widgets
 
     def create_widgets(self):
         self.label = QLabel("Enter the account holder's name: ")
@@ -44,6 +48,8 @@ class MainWindow(QMainWindow):
         self.depsub_button.clicked.connect(self.depsub_clicked)
         self.depsub_button.setVisible(False)
 
+        #Layout of the widgets from top to bottom
+
         layout = QVBoxLayout()
         layout.addWidget(self.label)
         layout.addWidget(self.account_name_input)
@@ -62,15 +68,20 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(widget)
 
     def submit_clicked(self):
+        #Search file for the balance of the input
         name = self.account_name_input.text()
         balance = self.retrieve_balance(name)
+        #If a balance is found
         if balance:
+            #set next frame of widgets
             self.withdraw_button.setVisible(True)
             self.deposit_button.setVisible(True)
             self.submit_button.setVisible(False)
             self.account_name_input.setVisible(False)
+            #Change Label
             self.label.setText("Balance for account name, {} is {} dollars".format(name, balance))
         else:
+            #If balance not found ask to create an account
             self.withdraw_button.setVisible(False)
             self.deposit_button.setVisible(False)
             print("balance for that account not found")
@@ -82,16 +93,22 @@ class MainWindow(QMainWindow):
 
     def create_account_clicked(self, name, startbalance):
         '''
+        attr: name - string, new account name
+        attr: startbalance - int, the starting balance fo the account
 
+        This function takes attr and calls add_balance to write the account to balance.txt file
         '''
+        #attempt to turn start balance into an in
         try:
             startbalance = int(self.input_field_startbal.text())
             name = str(self.account_name_input.text())
             if startbalance >= 1:
+                #stops from creating a negative balance account
                 startbalance = self.input_field_startbal.text()
                 name = str(self.account_name_input.text())
                 print(name, "create_account_clicked has variables", startbalance)
                 if True:
+                    #write to file with add_balance function then reset gui
                     self.add_balance(name, startbalance)
                     self.input_field_startbal.setVisible(False)
                     self.ballabel.setVisible(False)
@@ -99,9 +116,11 @@ class MainWindow(QMainWindow):
                     self.submit_button.setVisible(True)
                     self.label.setText("Account for {} created".format(name))
             else:
+                #tells user to not give a negative number
                 print("Account balance not greater than 0")
                 self.ballabel.setText("Starting balance must be more than 0")
         except ValueError:
+            #if failed then startbalance isnt a number
             self.ballabel.setText("Non Number given, try again")
 
 
@@ -117,6 +136,7 @@ class MainWindow(QMainWindow):
         This fuction takes a name as an arg and return balance
 
         """
+        #opens and reads file
         with open("balance.txt", "r") as f:
             for line in f:
                 account = line.strip().split(":")
@@ -125,19 +145,32 @@ class MainWindow(QMainWindow):
         return None
 
     def add_balance(self, name, amount):
+        '''
+        attr: name - string, new account name
+        return: - True/False, for succesful or failure write to file
+
+        This file takes two variables and writes them to balance.txt file
+        '''
         print(name, "add balance has variables", amount)
         with open("balance.txt", "a") as f:
+            #attempts to write to file
             if f.write("{}:{}\n".format(name, amount)):
                 print("added succesfully {} {}".format(name, amount))
                 f.close()
                 return True
             else:
+                #if fails returns false
                 f.close()
                 return False
 
     
     def update_balance(self, name, amount):
+        """
+        attr: name - string, name of the account being updated
+        return: True/False, if fails returns False else: returns True
+        """
         accounts = []
+        #haven't found account
         found = False
         with open("balance.txt", "r") as f:
             for line in f:
@@ -148,17 +181,20 @@ class MainWindow(QMainWindow):
                 else:
                     accounts.append(line.strip())
         if found:
+            #if balance found update balance
             with open("balance.txt", "w") as f:
                 for account in accounts:
                     f.write("{}\n".format(account))
 
     def withdraw_clicked(self):
+        #button sets visible
         self.withsub_button.setVisible(True)
         self.withdraw_button.setVisible(False)
         self.deposit_button.setVisible(False)
         self.input_field_with.setVisible(True)
 
     def deposit_clicked(self):
+        #button sets visible
         print("Deposit button clicked.")
         self.depsub_button.setVisible(True)
         self.withdraw_button.setVisible(False)
@@ -166,14 +202,21 @@ class MainWindow(QMainWindow):
         self.input_field_with.setVisible(True)
 
     def depsub_clicked(self):
+        """
+        attr: name - string, name of the accounts balance being changed
+        """
         print(type(self.input_field_with.text()))
         try: 
+            #attempts to turn deposit amount into int
             deposit = int(self.input_field_with.text())
             name = str(self.account_name_input.text())
             amount = self.retrieve_balance(name)
             if deposit >= 1:
+                #stops negative deposits
                 if amount >= 0:
+                    #updates balance by adding deposit (name, "+deposit")
                     self.update_balance(name, +deposit)
+                    #finds and returns balance after deposit
                     balance = self.retrieve_balance(name)
                     self.depsub_button.setVisible(False)
                     self.input_field_with.setVisible(False)
@@ -183,6 +226,7 @@ class MainWindow(QMainWindow):
             else:
                 self.label.setText("Cannot deposit less than 1 dollar")
         except ValueError:
+            #if failed return "non int given" to user
             print("non int given")
             print(self.input_field_with.text())
             self.label.setText("Non number given, try again")
