@@ -193,7 +193,7 @@ class MainWindow(QMainWindow):
             amount = self.retrieve_balance(name)
             withdraw = int(self.input_field_with.text())
             if withdraw >= 1:
-                if amount - withdraw >= 0:
+                if amount - withdraw >= 1:
                     self.update_balance(name, -withdraw)
                     balance = self.retrieve_balance(name)
                     self.withsub_button.setVisible(False)
@@ -201,6 +201,8 @@ class MainWindow(QMainWindow):
                     self.deposit_button.setVisible(True)
                     self.withdraw_button.setVisible(True)
                     self.label.setText("Withdrawl complete your balance is now {} dollars".format(balance))
+                else:
+                    self.label.setText("Cannot have less than 1 dollar in your account")
             else:
                 self.label.setText("Can not withdraw less than 1 dollar")
         except ValueError:
